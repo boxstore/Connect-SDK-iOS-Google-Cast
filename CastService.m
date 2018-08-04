@@ -110,6 +110,9 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
     capabilities = [capabilities arrayByAddingObjectsFromArray:kVolumeControlCapabilities];
     capabilities = [capabilities arrayByAddingObjectsFromArray:@[
             kMediaPlayerSubtitleWebVTT,
+            kMediaPlayerSubtitleCustomStyle,
+            kMediaPlayerMultipleSubtitle,
+            kMediaPlayerSetActiveSubtitle,
 
             kMediaControlPlay,
             kMediaControlPause,
@@ -532,6 +535,57 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 
         if (failure)
             failure([ConnectError generateErrorWithCode:ConnectStatusCodeTvError andDetails:nil]);
+    }
+}
+
+- (void) setCaptionStyle:(id)style success:(SuccessBlock)success failure:(FailureBlock)failure {
+    if ([style isKindOfClass:[GCKMediaTextTrackStyle class]]) {
+        NSInteger result;
+        
+        @try
+        {
+            result = [_castMediaControlChannel setTextTrackStyle: style];
+        } @catch (NSException *exception)
+        {
+            // this exception will be caught when trying to send command with no video
+            result = kGCKInvalidRequestID;
+        }
+        
+        if (result == kGCKInvalidRequestID)
+        {
+            if (failure)
+                failure(nil);
+        } else
+        {
+            if (success)
+                success(nil);
+        }
+        
+    } else {
+        [self sendNotSupportedFailure:failure];
+    }
+}
+
+- (void) setActiveTrackIDs:(NSArray *)ids success:(SuccessBlock)success failure:(FailureBlock)failure {
+    NSInteger result;
+    
+    @try
+    {
+        result = [_castMediaControlChannel setActiveTrackIDs: ids];
+    } @catch (NSException *exception)
+    {
+        // this exception will be caught when trying to send command with no video
+        result = kGCKInvalidRequestID;
+    }
+    
+    if (result == kGCKInvalidRequestID)
+    {
+        if (failure)
+            failure(nil);
+    } else
+    {
+        if (success)
+            success(nil);
     }
 }
 
