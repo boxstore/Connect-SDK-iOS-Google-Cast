@@ -455,10 +455,6 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 }
 
 - (void) playMediaWithMediaInfo:(MediaInfo *)mediaInfo shouldLoop:(BOOL)shouldLoop success:(MediaPlayerSuccessBlock)success failure:(FailureBlock)failure{
-    [self playMediaWithMediaInfo:mediaInfo captionStyle:[GCKMediaTextTrackStyle createDefault] shouldLoop:NO success:success failure:failure];
-}
-
-- (void) playMediaWithMediaInfo:(MediaInfo *)mediaInfo captionStyle:(id)style shouldLoop:(BOOL)shouldLoop success:(MediaPlayerSuccessBlock)success failure:(FailureBlock)failure {
     NSURL *iconURL;
     if(mediaInfo.images) {
         ImageInfo *imageInfo = [mediaInfo.images firstObject];
@@ -487,7 +483,7 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
                                              metadata:metaData
                                              streamDuration:1000
                                              mediaTracks:mediaTracks
-                                             textTrackStyle:style
+                                             textTrackStyle:[GCKMediaTextTrackStyle createDefault]
                                              customData:nil];
     
     [self playMedia:mediaInformation webAppId:self.castWebAppId success:success failure:failure];
