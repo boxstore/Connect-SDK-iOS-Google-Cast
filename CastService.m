@@ -540,6 +540,13 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 }
 
 - (void) setCaptionStyle:(id)style success:(SuccessBlock)success failure:(FailureBlock)failure {
+    if (!self.castMediaControlChannel.mediaStatus)
+    {
+        if (failure)
+            failure([ConnectError generateErrorWithCode:ConnectStatusCodeError andDetails:@"There is no media currently available"]);
+        
+        return;
+    }
     NSInteger result;
     
     @try
