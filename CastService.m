@@ -30,7 +30,7 @@
 #define kCastServiceMuteSubscriptionName @"mute"
 #define kCastServiceVolumeSubscriptionName @"volume"
 
-static const NSInteger kSubtitleTrackIdentifier = 42;
+static const NSInteger kSubtitleTrackIdentifier = 1000;
 
 static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 
@@ -57,6 +57,7 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
     
     float _currentVolumeLevel;
     BOOL _currentMuteStatus;
+    NSTimeInterval startTime;
 }
 
 - (void) commonSetup
@@ -476,6 +477,7 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
         mediaTracks = @[
                         [self mediaTrackFromSubtitleInfo:mediaInfo.subtitleInfo]];
     }
+    startTime = mediaInfo.startTime;
     GCKMediaInformation *mediaInformation = [[GCKMediaInformation alloc]
                                              initWithContentID:mediaInfo.url.absoluteString
                                              streamType:GCKMediaStreamTypeBuffered
@@ -495,13 +497,14 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
     {
         NSArray *trackIDs;
         if (mediaInformation.mediaTracks) {
-            trackIDs = @[@(kSubtitleTrackIdentifier)];
+            GCKMediaTrack *track = [mediaInformation.mediaTracks firstObject];
+            trackIDs = @[@(track.identifier)];
         }
         
-        NSInteger result = [_castMediaControlChannel loadMedia:mediaInformation
-                                                      autoplay:YES
-                                                  playPosition:0.0
-                                                activeTrackIDs:trackIDs];
+        NSInteger result = [self->_castMediaControlChannel loadMedia:mediaInformation
+                                                            autoplay:YES
+                                                        playPosition:self->startTime
+                                                      activeTrackIDs:trackIDs];
         
         if (result == kGCKInvalidRequestID)
         {
@@ -511,7 +514,7 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
         {
             webAppSession.launchSession.sessionType = LaunchSessionTypeMedia;
             
-            _castMediaControlChannel.delegate = self;
+            self->_castMediaControlChannel.delegate = self;
             
             if (success){
                 MediaLaunchObject *launchObject = [[MediaLaunchObject alloc] initWithLaunchSession:webAppSession.launchSession andMediaControl:webAppSession.mediaControl];
@@ -557,7 +560,6 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
         // this exception will be caught when trying to send command with no video
         result = kGCKInvalidRequestID;
     }
-    
     if (result == kGCKInvalidRequestID)
     {
         if (failure)
@@ -1250,7 +1252,7 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 
 - (GCKMediaTrack *)mediaTrackFromSubtitleInfo:(SubtitleInfo *)subtitleInfo {
     return [[GCKMediaTrack alloc]
-            initWithIdentifier:kSubtitleTrackIdentifier
+            initWithIdentifier: subtitleInfo.subIdentifier >= 0 ?: kSubtitleTrackIdentifier
             contentIdentifier:subtitleInfo.url.absoluteString
             contentType:subtitleInfo.mimeType
             type:GCKMediaTrackTypeText
