@@ -539,30 +539,24 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 }
 
 - (void) setCaptionStyle:(id)style success:(SuccessBlock)success failure:(FailureBlock)failure {
-    if ([style isKindOfClass:[GCKMediaTextTrackStyle class]]) {
-        NSInteger result;
-        
-        @try
-        {
-            result = [_castMediaControlChannel setTextTrackStyle: style];
-        } @catch (NSException *exception)
-        {
-            // this exception will be caught when trying to send command with no video
-            result = kGCKInvalidRequestID;
-        }
-        
-        if (result == kGCKInvalidRequestID)
-        {
-            if (failure)
-                failure(nil);
-        } else
-        {
-            if (success)
-                success(nil);
-        }
-        
-    } else {
-        [self sendNotSupportedFailure:failure];
+    NSInteger result;
+    @try
+    {
+        result = [_castMediaControlChannel setTextTrackStyle: style];
+    } @catch (NSException *exception)
+    {
+        // this exception will be caught when trying to send command with no video
+        result = kGCKInvalidRequestID;
+    }
+    
+    if (result == kGCKInvalidRequestID)
+    {
+        if (failure)
+            failure(nil);
+    } else
+    {
+        if (success)
+            success(nil);
     }
 }
 
