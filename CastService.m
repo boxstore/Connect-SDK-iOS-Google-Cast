@@ -472,10 +472,16 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
         [metaData addImage:iconImage];
     }
     
-    NSArray *mediaTracks;
-    if (mediaInfo.subtitleInfo) {
-        mediaTracks = @[
-                        [self mediaTrackFromSubtitleInfo:mediaInfo.subtitleInfo]];
+    NSMutableArray *mediaTracks;
+    if (mediaInfo.tracks && mediaInfo.tracks.count > 0)
+    {
+        mediaTracks = [[NSMutableArray alloc] init];
+        for (int i = 0; i < mediaInfo.tracks.count; i++) {
+            [mediaTracks addObject: [self mediaTrackFromSubtitleInfo: mediaInfo.tracks[i]]];
+        }
+    }
+    else if (mediaInfo.subtitleInfo) {
+        mediaTracks = @[[self mediaTrackFromSubtitleInfo:mediaInfo.subtitleInfo]];
     }
     startTime = mediaInfo.startTime;
     GCKMediaInformation *mediaInformation = [[GCKMediaInformation alloc]
@@ -543,6 +549,7 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 }
 
 - (void) setCaptionStyle:(id)style success:(SuccessBlock)success failure:(FailureBlock)failure {
+    NSInteger result;
     if (!self.castMediaControlChannel.mediaStatus)
     {
         if (failure)
@@ -550,8 +557,6 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
         
         return;
     }
-    NSInteger result;
-    
     @try
     {
         result = [_castMediaControlChannel setTextTrackStyle: style];
