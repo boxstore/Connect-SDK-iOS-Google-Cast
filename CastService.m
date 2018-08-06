@@ -503,9 +503,14 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
     {
         NSArray *trackIDs;
         if (mediaInformation.mediaTracks) {
+            for (int i = 0; i < mediaInformation.mediaTracks.count; i++) {
+                GCKMediaTrack *track = mediaInformation.mediaTracks[i];
+                NSLog(@"GCKMediaTrack *track %d", track.identifier);
+            }
             GCKMediaTrack *track = [mediaInformation.mediaTracks firstObject];
             trackIDs = @[@(track.identifier)];
         }
+        NSLog(@"%@", trackIDs);
         
         NSInteger result = [self->_castMediaControlChannel loadMedia:mediaInformation
                                                             autoplay:YES
@@ -1256,8 +1261,9 @@ static NSString *const kSubtitleTrackDefaultLanguage = @"en";
 }
 
 - (GCKMediaTrack *)mediaTrackFromSubtitleInfo:(SubtitleInfo *)subtitleInfo {
+    NSLog(@"mediaTrackFromSubtitleInfo %d", subtitleInfo.subIdentifier);
     return [[GCKMediaTrack alloc]
-            initWithIdentifier: subtitleInfo.subIdentifier >= 0 ?: kSubtitleTrackIdentifier
+            initWithIdentifier: subtitleInfo.subIdentifier >= 0 ? subtitleInfo.subIdentifier : kSubtitleTrackIdentifier
             contentIdentifier:subtitleInfo.url.absoluteString
             contentType:subtitleInfo.mimeType
             type:GCKMediaTrackTypeText
